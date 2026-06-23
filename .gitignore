@@ -1,0 +1,24 @@
+# 虛擬環境（體積大、可重建，勿上傳）
+venv/
+
+# 訓練輸出（可重新訓練產生）
+runs/
+
+# 預訓練權重（執行時會自動下載）
+yolov8n.pt
+yolov8n-cls.pt
+
+# Python 快取
+__pycache__/
+*.pyc
+
+# 壓縮備份
+*.zip
+
+# 不需上傳的原始 / 衍生資料（已由 dataset_det 取代）
+dataset/
+dataset_images/
+影像辨識資料集/
+
+# 個人 IDE 設定
+.vscode/

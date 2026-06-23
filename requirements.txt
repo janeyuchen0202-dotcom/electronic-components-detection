@@ -1,0 +1,14 @@
+# 安裝指令： pip install -r requirements.txt
+#
+# 注意：torch / torchvision 鎖定在 2.5.1 / 0.20.1 的 CPU 版本。
+# 較新的 torch build (例如 2.12.x) 在部分 Windows 環境會出現
+# "WinError 1114  c10.dll 初始化失敗" 而無法載入，故鎖定此已驗證可用的版本。
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+opencv-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+pillow-heif>=0.13.0
+torch==2.5.1
+torchvision==0.20.1
+ultralytics>=8.0.0

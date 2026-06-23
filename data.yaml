@@ -1,0 +1,20 @@
+# YOLOv8 物件偵測資料集設定（由 build_dataset_det.py 自動產生）
+path: c:\Users\ImNotMac\Desktop\影像辨識\dataset_det
+train: images/train
+val: images/val
+
+nc: 13
+names:
+  0: 二極體
+  1: 三用電表
+  2: 工具箱
+  3: 白色LED
+  4: 紅色LED
+  5: 測試線
+  6: 電阻
+  7: 電容
+  8: 電線
+  9: 綠色LED
+  10: 撥線鉗
+  11: 麵包版
+  12: IC
