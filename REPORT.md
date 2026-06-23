@@ -127,10 +127,7 @@ preprocess_and_rename.py → label_tool.bat → build_dataset_det.py → train.p
 
 ## 七、GitHub 連結
 
-```text
-（請填入你的公開 GitHub 倉庫網址）
-https://github.com/__________/__________
-```
+https://github.com/janeyuchen0202-dotcom/electronic-components-detection
 
 ---
 
