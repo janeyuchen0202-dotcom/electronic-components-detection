@@ -131,9 +131,8 @@ https://github.com/janeyuchen0202-dotcom/electronic-components-detection
 
 ## 八、展示影片連結
 
-```text
-（請填入你的展示影片觀看 / 下載連結）
-https://__________
+```
+https://drive.google.com/drive/folders/1KMAdjsgqaN0Ka_IJ1804B8h2jggcCchA?usp=drive_link
 ```
 
 ---
