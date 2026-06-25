@@ -4,6 +4,9 @@ venv/
 # 訓練輸出（可重新訓練產生）
 runs/
 
+# 錄影輸出
+recordings/
+
 # 預訓練權重（執行時會自動下載）
 yolov8n.pt
 yolov8n-cls.pt

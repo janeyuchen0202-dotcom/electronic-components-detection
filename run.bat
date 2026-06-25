@@ -8,27 +8,47 @@ echo   Electronic Components Recognition - Setup
 echo ==========================================
 echo.
 
-REM ---- 1. Check Python ----
-where python >nul 2>nul
-if errorlevel 1 (
-    echo [ERROR] Python not found.
-    echo Please install Python 3.8 - 3.11: https://www.python.org/downloads/
+REM ---- 1. Find a compatible Python (torch supports 3.10-3.13; prefer verified 3.11) ----
+set "PYEXE="
+for %%V in (3.11 3.12 3.10 3.13) do if not defined PYEXE (
+    py -%%V -c "import sys" >nul 2>nul
+    if not errorlevel 1 set "PYEXE=py -%%V"
+)
+if not defined PYEXE (
+    where python >nul 2>nul
+    if not errorlevel 1 set "PYEXE=python"
+)
+if not defined PYEXE (
+    echo [ERROR] No suitable Python found.
+    echo Please install Python 3.11 ^(recommended^): https://www.python.org/downloads/
     echo Remember to check "Add Python to PATH" during installation.
     pause
     exit /b
 )
+echo [Info] Using Python: %PYEXE%
 
-REM ---- 2. Create virtual environment if missing ----
-if not exist "venv\Scripts\activate.bat" (
-    echo [Step 1/3] Creating virtual environment "venv" ...
-    python -m venv venv
+REM ---- 2. Create or repair virtual environment ----
+REM A venv copied from another PC has hardcoded paths and cannot run; detect and rebuild.
+set "VENV_OK="
+if exist "venv\Scripts\python.exe" (
+    venv\Scripts\python.exe -c "import sys" >nul 2>nul
+    if not errorlevel 1 set "VENV_OK=1"
+)
+if defined VENV_OK (
+    echo [Step 1/3] Virtual environment OK. Skipping creation.
+) else (
+    if exist "venv" (
+        echo [Step 1/3] Existing venv is invalid ^(likely copied from another PC^). Rebuilding ...
+        rmdir /s /q venv
+    ) else (
+        echo [Step 1/3] Creating virtual environment "venv" ...
+    )
+    %PYEXE% -m venv venv
     if errorlevel 1 (
         echo [ERROR] Failed to create virtual environment.
         pause
         exit /b
     )
-) else (
-    echo [Step 1/3] Virtual environment already exists. Skipping.
 )
 
 REM ---- 3. Activate ----

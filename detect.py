@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import numpy as np
+from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -62,6 +63,18 @@ def draw_detections(frame, boxes, names, font):
     return cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
 
 
+def open_writer(out_dir, width, height, fps):
+    """建立錄影 VideoWriter。優先用 mp4 (mp4v)，若環境不支援則退回 avi (XVID)。"""
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    for ext, codec in (('mp4', 'mp4v'), ('avi', 'XVID')):
+        path = os.path.join(out_dir, f'rec_{ts}.{ext}')
+        writer = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*codec), fps, (width, height))
+        if writer.isOpened():
+            return writer, path
+        writer.release()
+    return None, None
+
+
 def main():
     # train.py 訓練完會把最佳權重複製到專案根目錄的 best.pt
     model_path = os.path.join(HERE, 'best.pt')
@@ -85,8 +98,16 @@ def main():
         print("[錯誤] 無法開啟攝影機，請確認裝置是否正確連接，且未被其他程式佔用。")
         sys.exit(1)
 
+    # 錄影輸出資料夾與影格率（攝影機回報的 FPS 常不可靠，無效時退回 20）
+    out_dir = os.path.join(HERE, 'recordings')
+    os.makedirs(out_dir, exist_ok=True)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if not fps or fps <= 1:
+        fps = 20.0
+    writer = None  # None 表示目前未錄影
+
     print("[成功] 成功開啟攝影機！開始即時物件偵測。")
-    print("[提示] 點擊影像視窗後，按下鍵盤上的 'q' 鍵即可退出程式。")
+    print("[提示] 點擊影像視窗後：按 'r' 開始/停止錄影，按 'q' 退出程式。")
 
     while True:
         ret, frame = cap.read()
@@ -97,12 +118,35 @@ def main():
         results = model.predict(source=frame, conf=CONFIDENCE_THRESHOLD, verbose=False)
         frame = draw_detections(frame, results[0].boxes, names, font)
 
-        cv2.imshow("Electronic Components Detection  (press Q to quit)", frame)
+        # 錄影中：先寫入乾淨畫面，再於預覽畫面疊上紅色 REC 標記（不會錄進影片）
+        if writer is not None:
+            writer.write(frame)
+            cv2.circle(frame, (26, 26), 10, (0, 0, 255), -1)
+            cv2.putText(frame, "REC", (44, 34), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.8, (0, 0, 255), 2, cv2.LINE_AA)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        cv2.imshow("Electronic Components Detection  (R: record  Q: quit)", frame)
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             print("\n[提示] 接收到 'q' 鍵指令，正在關閉程式...")
             break
+        elif key == ord('r'):
+            if writer is None:
+                h, w = frame.shape[:2]
+                writer, out_path = open_writer(out_dir, w, h, fps)
+                if writer is None:
+                    print("[錯誤] 無法建立錄影檔（此環境缺少可用的影片編碼器）。")
+                else:
+                    print(f"[錄影] 開始錄影 -> {out_path}")
+            else:
+                writer.release()
+                writer = None
+                print("[錄影] 已停止並儲存。")
 
+    if writer is not None:
+        writer.release()
+        print("[錄影] 已停止並儲存。")
     cap.release()
     cv2.destroyAllWindows()
 
